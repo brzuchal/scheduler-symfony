@@ -1,0 +1,46 @@
+{
+  "name": "brzuchal/scheduler-bundle",
+  "description": "Symfony Bundle for scheduling messages library",
+  "minimum-stability": "stable",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Michał Marcin Brzuchalski",
+      "email": "michal.brzuchalski@gmail.com",
+      "role": "Maintainer"
+    }
+  ],
+  "require": {
+    "php": "8.1.*",
+    "symfony/framework-bundle": "^6.0",
+    "symfony/messenger": "^6.0",
+    "brzuchal/scheduler": "^1.0@dev"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5",
+    "doctrine/doctrine-bundle": "^2.6",
+    "doctrine/coding-standard": "^9.0",
+    "psalm/plugin-phpunit": "^0.16.1",
+    "psalm/plugin-symfony": "^3",
+    "vimeo/psalm": "^4.22"
+  },
+  "autoload": {
+    "psr-4": {
+      "Brzuchal\\SchedulerBundle\\": ""
+    },
+    "exclude-from-classmap": [
+      "Tests/"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Brzuchal\\SchedulerBundle\\Tests\\": "Tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  }
+}
