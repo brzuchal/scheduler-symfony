@@ -35,7 +35,7 @@ final class SchedulerExtension extends Extension
             return;
         }
 
-        $driver = 'in_memory';
+        $driver = 'doctrine';
         if (array_key_exists('driver', $config['store'])) {
             $driver = $config['store']['driver'];
         }
