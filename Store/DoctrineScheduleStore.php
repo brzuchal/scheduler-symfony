@@ -180,7 +180,7 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
         }
 
         $table = $schema->createTable($this->dataTableName);
-        $table->addColumn('id', Types::STRING)
+        $table->addColumn('id', Types::STRING, ['length' => 36])
             ->setNotnull(true);
         $table->addColumn('trigger_at', Types::DATETIME_IMMUTABLE)
             ->setNotnull(true);
@@ -202,7 +202,7 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
     protected function addExecutionsTableSchema(Schema $schema): void
     {
         $table = $schema->createTable($this->executionTableName);
-        $table->addColumn('schedule_id', Types::STRING)
+        $table->addColumn('schedule_id', Types::STRING, ['length' => 36])
             ->setNotnull(true);
         $table->addColumn('iteration', Types::INTEGER)
             ->setNotnull(true);
@@ -213,7 +213,6 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
             $this->dataTableName,
             ['schedule_id'],
             ['id'],
-            ['onDelete' => 'CASCADE'],
         );
     }
 }
