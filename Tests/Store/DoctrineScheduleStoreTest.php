@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Brzuchal\SchedulerBundle\Tests\Store;
 
+use Brzuchal\RecurrenceRule\Freq;
+use Brzuchal\RecurrenceRule\Rule;
 use Brzuchal\Scheduler\ScheduleState;
 use Brzuchal\Scheduler\Store\ScheduleEntryNotFound;
 use Brzuchal\Scheduler\Tests\Fixtures\FooMessage;
@@ -110,11 +112,19 @@ class DoctrineScheduleStoreTest extends TestKernelTestCase
         $previousEntry = $this->fetchEntry();
         $this > self::assertNotEmpty($previousEntry);
         $previous = $previousEntry['trigger_at'];
-        $this->store->updateSchedule(self::IDENTIFIER, new DateTimeImmutable('yesterday'), ScheduleState::Pending);
+        $this->store->updateSchedule(
+            self::IDENTIFIER,
+            new DateTimeImmutable('yesterday'),
+            ScheduleState::Pending,
+            new Rule(Freq::Yearly),
+            new DateTimeImmutable('+1 week'),
+        );
         $entry = $this->fetchEntry();
         // phpcs:disable
         $this->assertNotEmpty($entry['trigger_at']);
         $this->assertNotEquals($previous, $entry['trigger_at']);
+        $this->assertNotEmpty($entry['rule']);
+        $this->assertNotEmpty($entry['start_at']);
     }
 
     /** @depends testUpdate */

@@ -41,14 +41,23 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
     ) {
     }
 
-    public function updateSchedule(string $identifier, DateTimeImmutable $triggerDateTime, ScheduleState $state): void
-    {
+    public function updateSchedule(
+        string $identifier,
+        DateTimeImmutable $triggerDateTime,
+        ScheduleState $state,
+        Rule|null $rule = null,
+        DateTimeImmutable|null $startDateTime = null
+    ): void {
         $this->connection->update($this->dataTableName, [
             'trigger_at' => $triggerDateTime,
+            'rule' => $rule?->toString(),
+            'start_at' => $startDateTime,
             'state' => $state->value,
         ], ['id' => $identifier], [
-            Types::DATETIME_IMMUTABLE,
-            Types::STRING,
+            'trigger_at' => Types::DATETIME_IMMUTABLE,
+            'rule' => Types::STRING,
+            'start_at' => Types::DATETIME_IMMUTABLE,
+            'state' => Types::STRING,
         ]);
     }
 
