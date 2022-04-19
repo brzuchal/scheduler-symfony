@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Brzuchal\SchedulerBundle\Store;
 
+use Brzuchal\RecurrenceRule\Rule;
+use Brzuchal\RecurrenceRule\RuleFactory;
 use Brzuchal\Scheduler\ScheduleState;
 use Brzuchal\Scheduler\Store\ScheduleEntryNotFound;
 use Brzuchal\Scheduler\Store\ScheduleStore;
@@ -17,7 +19,6 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\SchemaException;
-use Doctrine\DBAL\Types\DateIntervalType;
 use Doctrine\DBAL\Types\DateTimeTzImmutableType;
 use Doctrine\DBAL\Types\Types;
 
@@ -58,7 +59,7 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
     public function findSchedule(string $identifier): ScheduleStoreEntry
     {
         $sql = sprintf(
-            'SELECT `trigger_at`, `serialized`, `interval` FROM %s WHERE `id` = ?',
+            'SELECT `trigger_at`, `serialized`, `rule`, `start_at` FROM %s WHERE `id` = ?',
             $this->dataTableName,
         );
         $entry = $this->connection->prepare($sql)
@@ -71,11 +72,13 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
 
         assert(is_array($entry));
         $platform = $this->connection->getDatabasePlatform();
+        $type = new DateTimeTzImmutableType();
 
         return new SimpleScheduleStoreEntry(
-            (new DateTimeTzImmutableType())->convertToPHPValue((string) $entry['trigger_at'], $platform),
+            $type->convertToPHPValue((string) $entry['trigger_at'], $platform),
             unserialize($entry['serialized']),
-            (new DateIntervalType())->convertToPHPValue($entry['interval'] ?? null, $platform),
+            !empty($entry['interval']) ? RuleFactory::fromString($entry['interval']) : null,
+            !empty($entry['start_at']) ? $type->convertToPHPValue($entry['start_at'], $platform) : null,
         );
     }
 
@@ -83,17 +86,21 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
         string $identifier,
         DateTimeImmutable $triggerDateTime,
         object $message,
-        DateInterval|null $interval = null,
+        Rule|null $rule = null,
+        DateTimeImmutable|null $startDateTime = null,
     ): void {
+        $utc = new DateTimeZone('UTC');
         $this->connection->insert($this->dataTableName, [
             'id' => $identifier,
-            'trigger_at' => $triggerDateTime->setTimezone(new DateTimeZone('UTC')),
+            'trigger_at' => $triggerDateTime->setTimezone($utc),
             'serialized' => serialize($message),
-            'interval' => $interval,
+            'rule' => $rule?->toString(),
+            'start_at' => $startDateTime?->setTimezone($utc),
             'state' => ScheduleState::Pending->value,
         ], [
             'trigger_at' => Types::DATETIME_IMMUTABLE,
-            'interval' => Types::DATEINTERVAL,
+            'rule' => Types::STRING,
+            'start_at' => Types::DATETIME_IMMUTABLE,
             'state' => Types::STRING,
         ]);
     }
@@ -170,7 +177,9 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
             ->setNotnull(true);
         $table->addColumn('serialized', Types::TEXT)
             ->setNotnull(true);
-        $table->addColumn('interval', Types::DATEINTERVAL)
+        $table->addColumn('rule', Types::TEXT)
+            ->setNotnull(false);
+        $table->addColumn('start_at', Types::DATETIME_IMMUTABLE)
             ->setNotnull(false);
         $table->addColumn('state', Types::STRING, ['length' => $length]);
         $table->setPrimaryKey(['id']);

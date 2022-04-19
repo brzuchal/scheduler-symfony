@@ -1,7 +1,7 @@
 {
   "name": "brzuchal/scheduler-bundle",
   "description": "Symfony Bundle for scheduling messages library",
-  "minimum-stability": "stable",
+  "minimum-stability": "dev",
   "type": "library",
   "license": "MIT",
   "authors": [

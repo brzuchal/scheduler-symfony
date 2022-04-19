@@ -72,9 +72,7 @@ class DoctrineScheduleStoreTest extends TestKernelTestCase
         $this->store->findSchedule(self::IDENTIFIER);
     }
 
-    /**
-     * @depends testNotFound
-     */
+    /** @depends testNotFound */
     public function testInsert(): void
     {
         $triggerDateTime = new DateTimeImmutable('tomorrow');
@@ -85,32 +83,28 @@ class DoctrineScheduleStoreTest extends TestKernelTestCase
         );
         $entry = $this->fetchEntry();
         $this->assertNotEmpty($entry);
-        $this->assertNull($entry['interval']);
+        $this->assertNull($entry['rule']);
+        $this->assertNull($entry['start_at']);
     }
 
-    /**
-     * @depends testInsert
-     */
+    /** @depends testInsert */
     public function testFind(): void
     {
         $schedule = $this->store->findSchedule(self::IDENTIFIER);
         $this->assertInstanceOf(FooMessage::class, $schedule->message());
         $this->assertGreaterThan(new DateTimeImmutable('now'), $schedule->triggerDateTime());
-        $this->assertNull($schedule->interval());
+        $this->assertNull($schedule->rule());
+        $this->assertNull($schedule->startDateTime());
     }
 
-    /**
-     * @depends testInsert
-     */
+    /** @depends testInsert */
     public function testNoPending(): void
     {
         $identifiers = $this->store->findPendingSchedules(new DateTimeImmutable('now'));
         $this->assertEmpty($identifiers);
     }
 
-    /**
-     * @depends testNoPending
-     */
+    /** @depends testNoPending */
     public function testUpdate(): void
     {
         $previousEntry = $this->fetchEntry();
@@ -123,9 +117,7 @@ class DoctrineScheduleStoreTest extends TestKernelTestCase
         $this->assertNotEquals($previous, $entry['trigger_at']);
     }
 
-    /**
-     * @depends testUpdate
-     */
+    /** @depends testUpdate */
     public function testPending(): void
     {
         $identifiers = $this->store->findPendingSchedules(new DateTimeImmutable('now'));
@@ -133,9 +125,7 @@ class DoctrineScheduleStoreTest extends TestKernelTestCase
         $this->assertContainsEquals(self::IDENTIFIER, $identifiers);
     }
 
-    /**
-     * @depends testPending
-     */
+    /** @depends testPending */
     public function testDelete(): void
     {
         $this->store->deleteSchedule(self::IDENTIFIER);

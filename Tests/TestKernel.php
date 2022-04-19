@@ -28,14 +28,10 @@ final class TestKernel extends Kernel implements CompilerPassInterface
             'connection' => 'default',
         ],
     ];
-    /**
-     * @psalm-var array<array-key, mixed>
-     */
+    /** @psalm-var array<array-key, mixed> */
     protected array $setupConfig = self::DEFAULT_SETUP_CONFIG;
 
-    /**
-     * @return iterable<BundleInterface>
-     */
+    /** @return iterable<BundleInterface> */
     public function registerBundles(): iterable
     {
         return [
