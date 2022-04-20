@@ -15,7 +15,6 @@ jobs:
         dependency-versions:
           - lowest
           - highest
-          - locked
     steps:
       - uses: actions/checkout@v2
       - uses: shivammathur/setup-php@v2
