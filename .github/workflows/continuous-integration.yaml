@@ -24,6 +24,7 @@ jobs:
       - uses: ramsey/composer-install@v1
         with:
           dependency-versions: "${{ matrix.dependency-versions }}"
+          composer-options: "--prefer-stable"
       - name: PHPUnit
         run: vendor/bin/phpunit
   analysis:

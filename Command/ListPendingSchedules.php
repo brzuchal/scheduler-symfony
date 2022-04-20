@@ -48,8 +48,8 @@ final class ListPendingSchedules extends Command
         }
 
         $table = new Table($output);
-        $table->setHeaders(['Id', 'Class', 'Trigger time', 'Rule', 'Rule start time']);
-        foreach ($this->store->findPendingSchedules(new DateTimeImmutable('now')) as $identifier) {
+        $table->setHeaders(['Id', 'Class', 'Release on', 'RRule', 'DTStart']);
+        foreach ($this->store->findPendingSchedules(new DateTimeImmutable('+1 year')) as $identifier) {
             $schedule = $this->store->findSchedule($identifier);
             $class = \get_class($schedule->message());
             if ($type !== null && \is_a($class, $type, true) === false) {

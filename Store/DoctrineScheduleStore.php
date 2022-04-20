@@ -12,7 +12,6 @@ use Brzuchal\Scheduler\Store\ScheduleStore;
 use Brzuchal\Scheduler\Store\ScheduleStoreEntry;
 use Brzuchal\Scheduler\Store\SetupableScheduleStore;
 use Brzuchal\Scheduler\Store\SimpleScheduleStoreEntry;
-use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
 use Doctrine\DBAL\Connection;
@@ -62,8 +61,7 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
     }
 
     /**
-     * @throws Exception
-     * @throws ScheduleEntryNotFound
+     * @throws Exception|ScheduleEntryNotFound
      */
     public function findSchedule(string $identifier): ScheduleStoreEntry
     {
@@ -76,7 +74,10 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
             ->fetchAssociative();
 
         if ($entry === false) {
-            throw new ScheduleEntryNotFound('not found'); // TODO: make static factory method
+            throw new ScheduleEntryNotFound(sprintf(
+                'Schedule entry identified by %s not found',
+                $identifier,
+            ));
         }
 
         assert(is_array($entry));
@@ -86,7 +87,7 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
         return new SimpleScheduleStoreEntry(
             $type->convertToPHPValue((string) $entry['trigger_at'], $platform),
             unserialize($entry['serialized']),
-            !empty($entry['interval']) ? RuleFactory::fromString($entry['interval']) : null,
+            !empty($entry['rule']) ? RuleFactory::fromString($entry['rule']) : null,
             !empty($entry['start_at']) ? $type->convertToPHPValue($entry['start_at'], $platform) : null,
         );
     }
@@ -117,28 +118,29 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
     /**
      * @psalm-return iterable<non-empty-string>
      *
-     * @throws Exception
-     *
      * @psalm-suppress InvalidReturnType
      */
-    public function findPendingSchedules(DateTimeImmutable $date): iterable
-    {
-        $sql = sprintf(
-            'SELECT `id` FROM %s WHERE `trigger_at` < ? AND `state` = ?',
-            $this->dataTableName,
-        );
-        $params = [
-            $date,
-            ScheduleState::Pending->value,
-        ];
-        $types = [
-            Types::DATETIME_IMMUTABLE,
-            Types::STRING,
-        ];
+    public function findPendingSchedules(
+        DateTimeImmutable|null $beforeDateTime = null,
+        int|null $limit = null
+    ): iterable {
+        $queryBuilder = $this->connection->createQueryBuilder()
+            ->select('id')
+            ->from($this->dataTableName)
+            ->where('state = ?')
+            ->setParameter(0, ScheduleState::Pending->value, Types::STRING);
+        if ($beforeDateTime !== null) {
+            $queryBuilder->andWhere('trigger_at < ?')
+                ->setParameter(1, $beforeDateTime, Types::DATETIME_IMMUTABLE);
+        }
+
+        if ($limit > 0) {
+            $queryBuilder->setMaxResults($limit);
+        }
+
 
         /** @psalm-suppress InvalidReturnStatement */
-        return $this->connection->executeQuery($sql, $params, $types)
-            ->fetchFirstColumn();
+        return $queryBuilder->fetchFirstColumn();
     }
 
     /**
