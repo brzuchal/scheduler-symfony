@@ -16,14 +16,14 @@ return static function (ContainerConfigurator $container): void {
     $services->set(ReleasePendingSchedules::class)
         ->args([
             new Reference('scheduler.store'),
-            new Reference('scheduler'),
+            new Reference('scheduler.executor'),
         ]);
     $services->set(ListPendingSchedules::class)
         ->arg(0, new Reference('scheduler.store'));
     $services->set(ReleaseSchedule::class)
         ->args([
             new Reference('scheduler.store'),
-            new Reference('scheduler'),
+            new Reference('scheduler.executor'),
         ]);
     $services->set(ShowSchedule::class)
         ->arg(0, new Reference('scheduler.store'));

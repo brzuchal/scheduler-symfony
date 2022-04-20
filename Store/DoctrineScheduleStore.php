@@ -107,11 +107,13 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
             'rule' => $rule?->toString(),
             'start_at' => $startDateTime?->setTimezone($utc),
             'state' => ScheduleState::Pending->value,
+            'created_at' => new DateTimeImmutable('now'),
         ], [
             'trigger_at' => Types::DATETIME_IMMUTABLE,
             'rule' => Types::STRING,
             'start_at' => Types::DATETIME_IMMUTABLE,
             'state' => Types::STRING,
+            'created_at' => Types::DATETIME_IMMUTABLE,
         ]);
     }
 
@@ -160,7 +162,6 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
         $schemaManager = $this->connection->createSchemaManager();
         $schema = new Schema([], [], $schemaManager->createSchemaConfig());
         $this->addDataTableSchema($schema);
-        $this->addExecutionsTableSchema($schema);
         $schemaDiff = $schemaManager->createComparator()->compareSchemas($schemaManager->createSchema(), $schema);
         foreach ($schemaDiff->toSaveSql($this->connection->getDatabasePlatform()) as $sql) {
             $this->connection->executeStatement($sql);
@@ -193,28 +194,9 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
         $table->addColumn('start_at', Types::DATETIME_IMMUTABLE)
             ->setNotnull(false);
         $table->addColumn('state', Types::STRING, ['length' => $length]);
+        $table->addColumn('created_at', Types::DATETIME_IMMUTABLE);
         $table->setPrimaryKey(['id']);
         $table->addIndex(['trigger_at', 'state']);
         $table->addIndex(['state']);
-    }
-
-    /**
-     * @throws SchemaException
-     */
-    protected function addExecutionsTableSchema(Schema $schema): void
-    {
-        $table = $schema->createTable($this->executionTableName);
-        $table->addColumn('schedule_id', Types::STRING, ['length' => 36])
-            ->setNotnull(true);
-        $table->addColumn('iteration', Types::INTEGER)
-            ->setNotnull(true);
-        $table->addColumn('executed_at', Types::DATETIME_IMMUTABLE)
-            ->setNotnull(true);
-        $table->setPrimaryKey(['schedule_id', 'iteration']);
-        $table->addForeignKeyConstraint(
-            $this->dataTableName,
-            ['schedule_id'],
-            ['id'],
-        );
     }
 }
