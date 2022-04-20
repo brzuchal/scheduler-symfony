@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Brzuchal\SchedulerBundle\Command;
 
 use Brzuchal\Scheduler\Store\ScheduleStore;
-use DateTimeImmutable;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
@@ -49,15 +48,11 @@ final class ListPendingSchedules extends Command
 
         $table = new Table($output);
         $table->setHeaders(['Id', 'Class', 'Release on', 'RRule', 'DTStart']);
-        foreach ($this->store->findPendingSchedules(new DateTimeImmutable('+1 year')) as $identifier) {
+        foreach ($this->store->findPendingSchedules(limit: $limit) as $identifier) {
             $schedule = $this->store->findSchedule($identifier);
             $class = \get_class($schedule->message());
             if ($type !== null && \is_a($class, $type, true) === false) {
                 continue;
-            }
-
-            if (--$limit < 0) {
-                break;
             }
 
             $table->addRow([
