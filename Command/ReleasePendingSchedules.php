@@ -16,7 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand('scheduler:pending:release', 'Release pending scheduled messages')]
 final class ReleasePendingSchedules extends Command
 {
-    protected function __construct(
+    public function __construct(
         protected ScheduleStore $store,
         protected ScheduleExecutor $executor,
     ) {

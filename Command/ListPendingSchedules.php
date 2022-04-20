@@ -17,7 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand('scheduler:pending:list', 'Show pending scheduled messages list')]
 final class ListPendingSchedules extends Command
 {
-    protected function __construct(
+    public function __construct(
         protected ScheduleStore $store,
     ) {
         parent::__construct();
