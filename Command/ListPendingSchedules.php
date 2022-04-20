@@ -64,6 +64,8 @@ final class ListPendingSchedules extends Command
             ]);
         }
 
+        $table->render();
+
         return self::SUCCESS;
     }
 }

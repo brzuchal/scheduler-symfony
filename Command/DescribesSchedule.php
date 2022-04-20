@@ -25,5 +25,6 @@ trait DescribesSchedule
             ['Rule start time', $schedule->startDateTime()?->format('Y-m-d H:i:s')]
         ];
         $table->addRows($rows);
+        $table->render();
     }
 }
