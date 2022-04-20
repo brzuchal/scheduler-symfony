@@ -22,14 +22,8 @@ final class TestKernel extends Kernel implements CompilerPassInterface
 {
     use MicroKernelTrait;
 
-    protected const DEFAULT_SETUP_CONFIG = [
-        'store' => [
-            'driver' => 'doctrine',
-            'connection' => 'default',
-        ],
-    ];
     /** @psalm-var array<array-key, mixed> */
-    protected array $setupConfig = self::DEFAULT_SETUP_CONFIG;
+    protected array $setupConfig = [];
 
     /** @return iterable<BundleInterface> */
     public function registerBundles(): iterable

@@ -22,12 +22,12 @@ final class Configuration implements ConfigurationInterface
                     ->scalarNode('connection')->defaultValue('default')->end()
                     ->scalarNode('data_table')
                         ->defaultValue(
-                            DoctrineScheduleStore::DEFAULT_EXECUTIONS_TABLE_NAME,
+                            DoctrineScheduleStore::MESSAGES_TABLE_NAME,
                         )
                     ->end()
                     ->scalarNode('exec_table')
                         ->defaultValue(
-                            DoctrineScheduleStore::DEFAULT_DATA_TABLE_NAME,
+                            DoctrineScheduleStore::MESSAGES_TABLE_NAME,
                         )
                     ->end()
                 ->end()

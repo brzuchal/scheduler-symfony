@@ -31,12 +31,8 @@ final class SchedulerExtension extends Extension
         $loader->load('console.php');
         $loader->load('services.php');
         $config = $this->processConfiguration(new Configuration(), $configs);
-        if (! array_key_exists('store', $config)) {
-            return;
-        }
-
         $driver = 'doctrine';
-        if (array_key_exists('driver', $config['store'])) {
+        if (array_key_exists('store', $config) && array_key_exists('driver', $config['store'])) {
             $driver = $config['store']['driver'];
         }
 
@@ -52,11 +48,8 @@ final class SchedulerExtension extends Extension
                     $config['store']['connection'] ?? 'default',
                 );
                 $definition->replaceArgument(0, new Reference($doctrineConnection));
-                $dataTableName = $config['store']['data_table'] ?? DoctrineScheduleStore::DEFAULT_DATA_TABLE_NAME;
+                $dataTableName = $config['store']['table'] ?? DoctrineScheduleStore::MESSAGES_TABLE_NAME;
                 $definition->replaceArgument(1, $dataTableName);
-                // phpcs:ignore
-                $executionsTableName = $config['store']['exec_table'] ?? DoctrineScheduleStore::DEFAULT_EXECUTIONS_TABLE_NAME;
-                $definition->replaceArgument(2, $executionsTableName);
                 break;
         }
     }

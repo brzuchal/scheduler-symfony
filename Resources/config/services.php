@@ -20,9 +20,8 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             abstract_arg('Doctrine connection name'),
             abstract_arg('data table name'),
-            abstract_arg('executions table name'),
         ]);
-    $services->alias('scheduler.store', InMemoryScheduleStore::class);
+    $services->alias('scheduler.store', DoctrineScheduleStore::class);
     $services->set(MessengerExecutorFactory::class);
     $services->set('scheduler.executor', ScheduleExecutor::class)
         ->factory(service(MessengerExecutorFactory::class))

@@ -30,34 +30,27 @@ use function unserialize;
 
 final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleStore
 {
-    public const DEFAULT_EXECUTIONS_TABLE_NAME = 'schedule_exec';
-    public const DEFAULT_DATA_TABLE_NAME = 'schedule_data';
+    public const MESSAGES_TABLE_NAME = 'scheduler_messages';
 
     public function __construct(
         protected Connection $connection,
-        protected string $executionTableName = self::DEFAULT_EXECUTIONS_TABLE_NAME,
-        protected string $dataTableName = self::DEFAULT_DATA_TABLE_NAME,
+        protected string $messagesTableName = self::MESSAGES_TABLE_NAME,
     ) {
     }
 
     public function updateSchedule(
         string $identifier,
-        DateTimeImmutable $triggerDateTime,
         ScheduleState $state,
-        Rule|null $rule = null,
-        DateTimeImmutable|null $startDateTime = null
+        DateTimeImmutable|null $triggerDateTime = null,
     ): void {
-        $this->connection->update($this->dataTableName, [
-            'trigger_at' => $triggerDateTime,
-            'rule' => $rule?->toString(),
-            'start_at' => $startDateTime,
-            'state' => $state->value,
-        ], ['id' => $identifier], [
-            'trigger_at' => Types::DATETIME_IMMUTABLE,
-            'rule' => Types::STRING,
-            'start_at' => Types::DATETIME_IMMUTABLE,
-            'state' => Types::STRING,
-        ]);
+        $data = ['state' => $state->value];
+        $types = ['state' => Types::STRING];
+        if ($triggerDateTime) {
+            $data['trigger_at'] = $triggerDateTime;
+            $types['trigger_at'] = Types::DATETIME_IMMUTABLE;
+        }
+
+        $this->connection->update($this->messagesTableName, $data, ['id' => $identifier], $types);
     }
 
     /**
@@ -67,7 +60,7 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
     {
         $sql = sprintf(
             'SELECT `trigger_at`, `serialized`, `rule`, `start_at` FROM %s WHERE `id` = ?',
-            $this->dataTableName,
+            $this->messagesTableName,
         );
         $entry = $this->connection->prepare($sql)
             ->executeQuery([$identifier])
@@ -100,7 +93,7 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
         DateTimeImmutable|null $startDateTime = null,
     ): void {
         $utc = new DateTimeZone('UTC');
-        $this->connection->insert($this->dataTableName, [
+        $this->connection->insert($this->messagesTableName, [
             'id' => $identifier,
             'trigger_at' => $triggerDateTime->setTimezone($utc),
             'serialized' => serialize($message),
@@ -128,7 +121,7 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
     ): iterable {
         $queryBuilder = $this->connection->createQueryBuilder()
             ->select('id')
-            ->from($this->dataTableName)
+            ->from($this->messagesTableName)
             ->where('state = ?')
             ->setParameter(0, ScheduleState::Pending->value, Types::STRING);
         if ($beforeDateTime !== null) {
@@ -150,7 +143,7 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
      */
     public function deleteSchedule(string $identifier): void
     {
-        $this->connection->delete($this->dataTableName, ['id' => $identifier]);
+        $this->connection->delete($this->messagesTableName, ['id' => $identifier]);
     }
 
     /**
@@ -161,7 +154,7 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
     {
         $schemaManager = $this->connection->createSchemaManager();
         $schema = new Schema([], [], $schemaManager->createSchemaConfig());
-        $this->addDataTableSchema($schema);
+        $this->addMessagesTableSchema($schema);
         $schemaDiff = $schemaManager->createComparator()->compareSchemas($schemaManager->createSchema(), $schema);
         foreach ($schemaDiff->toSaveSql($this->connection->getDatabasePlatform()) as $sql) {
             $this->connection->executeStatement($sql);
@@ -171,7 +164,7 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
     /**
      * @throws SchemaException
      */
-    protected function addDataTableSchema(Schema $schema): void
+    protected function addMessagesTableSchema(Schema $schema): void
     {
         $length = 1;
         foreach (ScheduleState::cases() as $scheduleState) {
@@ -182,7 +175,7 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
             $length = strlen($scheduleState->value);
         }
 
-        $table = $schema->createTable($this->dataTableName);
+        $table = $schema->createTable($this->messagesTableName);
         $table->addColumn('id', Types::STRING, ['length' => 36])
             ->setNotnull(true);
         $table->addColumn('trigger_at', Types::DATETIME_IMMUTABLE)

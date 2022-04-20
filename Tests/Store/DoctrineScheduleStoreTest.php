@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Brzuchal\SchedulerBundle\Tests\Store;
 
-use Brzuchal\RecurrenceRule\Freq;
-use Brzuchal\RecurrenceRule\Rule;
 use Brzuchal\Scheduler\ScheduleState;
 use Brzuchal\Scheduler\Store\ScheduleEntryNotFound;
 use Brzuchal\Scheduler\Tests\Fixtures\FooMessage;
@@ -58,9 +56,8 @@ class DoctrineScheduleStoreTest extends TestKernelTestCase
     public function testSetup(): void
     {
         $suffix = substr(hash('sha1', (string) microtime(true)), 0, 8);
-        $dataTableName = 'schedule_data_' . $suffix;
-        $execTableName = 'schedule_exec_' . $suffix;
-        $store = new DoctrineScheduleStore($this->connection, $execTableName, $dataTableName);
+        $dataTableName = 'scheduler_messages_' . $suffix;
+        $store = new DoctrineScheduleStore($this->connection, $dataTableName);
         $schemaManager = $this->connection->createSchemaManager();
         $store->setup();
         $this->assertTrue($schemaManager->tablesExist([$dataTableName]));
@@ -69,6 +66,7 @@ class DoctrineScheduleStoreTest extends TestKernelTestCase
 
     public function testNotFound(): void
     {
+        $this->connection->executeQuery('DELETE FROM `scheduler_messages`');
         $this->expectException(ScheduleEntryNotFound::class);
         $this->store->findSchedule(self::IDENTIFIER);
     }
@@ -113,22 +111,25 @@ class DoctrineScheduleStoreTest extends TestKernelTestCase
         $previous = $previousEntry['trigger_at'];
         $this->store->updateSchedule(
             self::IDENTIFIER,
+            ScheduleState::Completed,
             new DateTimeImmutable('yesterday'),
-            ScheduleState::Pending,
-            new Rule(Freq::Yearly),
-            new DateTimeImmutable('+1 week'),
         );
         $entry = $this->fetchEntry();
         // phpcs:disable
         $this->assertNotEmpty($entry['trigger_at']);
         $this->assertNotEquals($previous, $entry['trigger_at']);
-        $this->assertNotEmpty($entry['rule']);
-        $this->assertNotEmpty($entry['start_at']);
+        $this->assertEquals(ScheduleState::Completed->value, $entry['state']);
     }
 
     /** @depends testUpdate */
     public function testPending(): void
     {
+        $this->connection->executeQuery('DELETE FROM `scheduler_messages`');
+        $this->store->insertSchedule(
+            self::IDENTIFIER,
+            new DateTimeImmutable('yesterday'),
+            new FooMessage(),
+        );
         $identifiers = $this->store->findPendingSchedules(new DateTimeImmutable('now'));
         $this->assertNotEmpty($identifiers);
         $this->assertContainsEquals(self::IDENTIFIER, $identifiers);
@@ -141,11 +142,10 @@ class DoctrineScheduleStoreTest extends TestKernelTestCase
         $this->assertFalse($this->fetchEntry());
     }
 
-
     protected function fetchEntry(): mixed
     {
         return $this->connection->fetchAssociative(
-            sprintf('SELECT * FROM `schedule_data` WHERE `id` = ?'),
+            sprintf('SELECT * FROM `scheduler_messages` WHERE `id` = ?'),
             [self::IDENTIFIER],
         );
     }
