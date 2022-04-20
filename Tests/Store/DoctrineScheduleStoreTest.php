@@ -63,8 +63,7 @@ class DoctrineScheduleStoreTest extends TestKernelTestCase
         $store = new DoctrineScheduleStore($this->connection, $execTableName, $dataTableName);
         $schemaManager = $this->connection->createSchemaManager();
         $store->setup();
-        $this->assertTrue($schemaManager->tablesExist([$execTableName, $dataTableName]));
-        $schemaManager->dropTable($execTableName);
+        $this->assertTrue($schemaManager->tablesExist([$dataTableName]));
         $schemaManager->dropTable($dataTableName);
     }
 

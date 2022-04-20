@@ -36,7 +36,7 @@ final class ReleaseSchedule extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $identifier = (string) $input->getOption('id');
+        $identifier = $input->getArgument('id');
         $schedule = $this->store->findSchedule($identifier);
         $this->describeSchedule($output, $identifier, $schedule);
         $helper = $this->getHelper('question');
