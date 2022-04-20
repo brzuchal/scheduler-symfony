@@ -19,8 +19,8 @@ final class ReleaseSchedule extends Command
     use DescribesSchedule;
 
     public function __construct(
-        protected ScheduleExecutor $executor,
         protected ScheduleStore $store,
+        protected ScheduleExecutor $executor,
     ) {
         parent::__construct();
     }
