@@ -44,7 +44,7 @@ final class ReleaseSchedule extends Command
             'Do you want to release this messages immediately? (yes/no)',
             true
         );
-        if (!$helper->ask($input, $output, $question)) {
+        if ($helper->ask($input, $output, $question)) {
             $this->executor->execute($identifier);
             return Command::SUCCESS;
         }
