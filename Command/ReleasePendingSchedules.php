@@ -13,8 +13,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-#[AsCommand('scheduler:execute:pending', 'Execute pending schedulers')]
-final class ExecutePending extends Command
+#[AsCommand('scheduler:pending:release', 'Release pending scheduled messages')]
+final class ReleasePendingSchedules extends Command
 {
     protected function __construct(
         protected ScheduleStore $store,
