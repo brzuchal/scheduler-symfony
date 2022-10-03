@@ -17,7 +17,7 @@
     "doctrine/doctrine-bundle": "^2.6",
     "symfony/framework-bundle": "^6.0",
     "symfony/messenger": "^6.0",
-    "brzuchal/scheduler": "^1.0@dev"
+    "brzuchal/scheduler": "1.1.*@dev"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5",

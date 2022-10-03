@@ -42,12 +42,18 @@ final class DoctrineScheduleStore implements ScheduleStore, SetupableScheduleSto
         string $identifier,
         ScheduleState $state,
         DateTimeImmutable|null $triggerDateTime = null,
+        Rule|null $rule = null,
     ): void {
         $data = ['state' => $state->value];
         $types = ['state' => Types::STRING];
         if ($triggerDateTime) {
             $data['trigger_at'] = $triggerDateTime;
             $types['trigger_at'] = Types::DATETIME_IMMUTABLE;
+        }
+
+        if ($rule) {
+            $data['rule'] = $rule->toString();
+            $types['rule'] = Types::STRING;
         }
 
         $this->connection->update($this->messagesTableName, $data, ['id' => $identifier], $types);

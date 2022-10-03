@@ -107,7 +107,7 @@ class DoctrineScheduleStoreTest extends TestKernelTestCase
     public function testUpdate(): void
     {
         $previousEntry = $this->fetchEntry();
-        $this > self::assertNotEmpty($previousEntry);
+        $this->assertNotEmpty($previousEntry);
         $previous = $previousEntry['trigger_at'];
         $this->store->updateSchedule(
             self::IDENTIFIER,
@@ -124,7 +124,7 @@ class DoctrineScheduleStoreTest extends TestKernelTestCase
     /** @depends testUpdate */
     public function testPending(): void
     {
-        $this->connection->executeQuery('DELETE FROM `scheduler_messages`');
+        $this->connection->executeQuery('DELETE FROM `scheduler_messages` WHERE id = ?', [self::IDENTIFIER]);
         $this->store->insertSchedule(
             self::IDENTIFIER,
             new DateTimeImmutable('yesterday'),
