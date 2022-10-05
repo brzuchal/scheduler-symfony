@@ -8,6 +8,7 @@ use Brzuchal\Scheduler\ScheduleExecutor;
 use Brzuchal\Scheduler\Store\ScheduleStore;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -40,6 +41,7 @@ final class ReleaseSchedule extends Command
         $schedule = $this->store->findSchedule($identifier);
         $this->describeSchedule($output, $identifier, $schedule);
         $helper = $this->getHelper('question');
+        \assert($helper instanceof QuestionHelper);
         $question = new ConfirmationQuestion(
             'Do you want to release this messages immediately? (yes/no)',
             true

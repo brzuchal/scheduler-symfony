@@ -8,8 +8,6 @@ use Brzuchal\Scheduler\Store\ScheduleStore;
 use Brzuchal\Scheduler\Store\SetupableScheduleStore;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\Dumper;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use UnexpectedValueException;
@@ -28,7 +26,7 @@ final class SetupStore extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!($this->store instanceof SetupableScheduleStore)) {
-            throw new UnexpectedValueException('Configured store is not setupable');
+            throw new UnexpectedValueException('Configured store don\'t require setup');
         }
 
         $this->store->setup();

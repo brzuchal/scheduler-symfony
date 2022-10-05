@@ -13,16 +13,14 @@ trait DescribesSchedule
         OutputInterface $output,
         string $identifier,
         ScheduleStoreEntry $schedule,
-    ): void
-    {
-        $class = \get_class($schedule->message());
+    ): void {
         $table = new Table($output);
         $rows = [
             ['Id', $identifier],
-            ['Class', $class],
+            ['Class', $schedule->message()::class],
             ['Trigger time', $schedule->triggerDateTime()->format('Y-m-d H:i:s')],
             ['Rule', $schedule->rule()?->toString()],
-            ['Rule start time', $schedule->startDateTime()?->format('Y-m-d H:i:s')]
+            ['Rule start time', $schedule->startDateTime()?->format('Y-m-d H:i:s')],
         ];
         $table->addRows($rows);
         $table->render();

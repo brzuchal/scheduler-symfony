@@ -15,7 +15,6 @@ use Symfony\Component\DependencyInjection\Reference;
 
 use function array_key_exists;
 use function dirname;
-use function dump;
 use function sprintf;
 
 final class SchedulerExtension extends Extension

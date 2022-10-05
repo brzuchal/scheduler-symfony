@@ -46,7 +46,7 @@ final class ReleasePendingSchedules extends Command
 
         $dateTime = new DateTimeImmutable($dateTimeString);
         foreach ($this->store->findPendingSchedules($dateTime) as $identifier) {
-            $output->writeln('<info>Executing <comment>{$identifier}</comment></info>');
+            $output->writeln("<info>Executing <comment>{$identifier}</comment></info>");
             $this->executor->execute($identifier);
         }
 
