@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Brzuchal\SchedulerBundle\Command\ReleasePendingSchedules;
 use Brzuchal\SchedulerBundle\Command\ListPendingSchedules;
 use Brzuchal\SchedulerBundle\Command\ReleaseSchedule;
+use Brzuchal\SchedulerBundle\Command\SetupStore;
 use Brzuchal\SchedulerBundle\Command\ShowSchedule;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
@@ -26,5 +27,7 @@ return static function (ContainerConfigurator $container): void {
             new Reference('scheduler.executor'),
         ]);
     $services->set(ShowSchedule::class)
+        ->arg(0, new Reference('scheduler.store'));
+    $services->set(SetupStore::class)
         ->arg(0, new Reference('scheduler.store'));
 };
