@@ -46,7 +46,7 @@ class DoctrineScheduleStoreTest extends TestKernelTestCase
     protected function setUp(): void
     {
         $this->connection = DriverManager::getConnection([
-            'url' => getenv('DATABASE_URL'),
+            'url' => (string) getenv('DATABASE_URL'),
             'driver' => 'pdo_sqlite',
         ]);
         $this->store = new DoctrineScheduleStore($this->connection);
