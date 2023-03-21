@@ -22,8 +22,8 @@
   "require-dev": {
     "phpunit/phpunit": "^9.5",
     "doctrine/coding-standard": "^9.0",
-    "psalm/plugin-phpunit": "^0.16.1",
-    "psalm/plugin-symfony": "^3",
+    "psalm/plugin-phpunit": "^0.18",
+    "psalm/plugin-symfony": "^5",
     "vimeo/psalm": "^5"
   },
   "autoload": {
